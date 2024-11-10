@@ -1,0 +1,81 @@
+/* src/styles/Student.css */
+
+.student-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .student-header h1 {
+    text-align: center;
+    color: #333;
+    font-size: 2em;
+  }
+  
+  .student-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .student-form input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 250px;
+  }
+  
+  .student-form button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .student-form button:hover {
+    background-color: #45a049;
+  }
+  
+  .student-list {
+    margin-top: 30px;
+    text-align: center;
+  }
+  
+  .student-list h2 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+  }
+  
+  .student-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .student-list th, .student-list td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .student-list th {
+    background-color: #f4f4f4;
+  }
+  
+  .student-list td button {
+    margin: 0 5px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .student-list td button:hover {
+    background-color: #f44336;
+    color: white;
+  }
+  
