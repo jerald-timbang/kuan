@@ -12,7 +12,7 @@ const AttendancePage = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('attendance') // Your table name
+        .from('User') // Your table name
         .select('*'); // Adjust the fields as needed
 
       if (error) {

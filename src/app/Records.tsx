@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Text } from '@/src/components/Themed';
 import { MaterialIcons } from '@expo/vector-icons'; // Ensure you have this package installed
 import { Link } from 'expo-router';
+import SignInPage from '@/src/app/(Auth)/SignIn'; // Adjust the import path accordingly
+
 
 export default function TabOneScreen() {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for menu visibility
@@ -35,9 +37,9 @@ export default function TabOneScreen() {
             <TouchableOpacity onPress={() => handleMenuClick('Item 2')}>
               <Link href={'/Records'} style={styles.menuItemText}>Records</Link>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleMenuClick('Item 3')}>
-              <RNText style={styles.menuItemText}>Student</RNText>
-            </TouchableOpacity>
+            {/* <TouchableOpacity onPress={() => handleMenuClick('Item 3')}>
+              <Link href={'/StudentCrud'} style={styles.menuItemText}>StudentCrud</Link>
+            </TouchableOpacity> */}
             <TouchableOpacity onPress={() => setIsMenuOpen(false)} style={styles.closeMenu}>
               <RNText style={styles.closeMenuText}>Close</RNText>
             </TouchableOpacity>

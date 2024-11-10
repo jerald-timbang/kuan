@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } fro
 import { useRouter } from 'expo-router'; // Import useRouter for navigation
 import { supabase } from '@/src/app/lib/supbase'; // Adjust the import path to your Supabase client
 import { AuthError } from '@supabase/supabase-js';
-import Screelogo from './screen';
+import Screelogo from '@/src/app/(Screen)/screen';
 
 const SignInPage = () => {
   const router = useRouter(); // Initialize router

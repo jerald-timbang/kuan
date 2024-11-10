@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router'; // Import useRouter for navigation
 import { supabase } from '@/src/app/lib/supbase'; // Adjust the import path to your Supabase client
-import SignInPage from '@/src/app/SignIn'; // Adjust the import path accordingly
+import SignInPage from '@/src/app/(Auth)/SignIn'; // Adjust the import path accordingly
 
 const AppWrapper = () => {
   const router = useRouter(); // Initialize router

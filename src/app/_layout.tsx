@@ -1,12 +1,13 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, Tabs } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/src/components/useColorScheme';
-import AppWrapper from '@/src/app/AppWrapper'; // Ensure this import is correct
+
+
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -14,8 +15,8 @@ export {
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: 'SignIn', // Set initial route to SignIn
+  // Set initial route to match the folder structure.
+  initialRouteName: '(Auth)/SignIn',
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -50,11 +51,18 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="SignIn" options={{ headerShown: false }} />
+        <Stack.Screen name="(Auth)/SignIn" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         <Stack.Screen name="attendancePage" options={{ headerShown: true }} />
-      </Stack>
+        {/* <Tabs.Screen name="profile" options={{ title: 'Profile' }} /> */}
+        {/* <Tabs.Screen name="edit-profile" options={{ title: 'Edit Profile' }} /> */}
+       
+        </Stack>
     </ThemeProvider>
   );
 }
+
+
+
+

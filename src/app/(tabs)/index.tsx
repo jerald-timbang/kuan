@@ -2,7 +2,7 @@ import { StyleSheet, View, TouchableOpacity, Modal, Text as RNText } from 'react
 import { useState } from 'react';
 import { Text } from '@/src/components/Themed';
 import { MaterialIcons } from '@expo/vector-icons';
-import Screelogo from '@/src/app/screen';
+import Screelogo from '@/src/app/(Screen)/screen';
 import { Link, useRouter } from 'expo-router';
 import { supabase } from '@/src/app/lib/supbase'; // Adjust the import path for your Supabase client
 
@@ -20,7 +20,7 @@ export default function TabOneScreen() {
     if (error) {
       console.error('Error signing out:', error.message);
     } else {
-      router.push('/SignIn'); // Navigate to the SignInPage after signing out
+      router.push('/(Auth)/SignIn'); // Navigate to the SignInPage after signing out
     }
   };
 
@@ -56,7 +56,15 @@ export default function TabOneScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => handleMenuClick('Student')} style={styles.menuItem}>
-              <RNText style={styles.menuItemText}>Student</RNText>
+            <Link href={'/Student'} style={styles.menuItemText}>
+                Student
+              </Link>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => handleMenuClick('profile')} style={styles.menuItem}>
+            <Link href={'/profile'} style={styles.menuItemText}>
+                profile
+              </Link>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleSignOut} style={styles.menuItem}>
