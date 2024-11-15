@@ -41,7 +41,7 @@ const Section = () => {
           <div className="popup-menu" onClick={(e) => e.stopPropagation()}>
             <button className="close-btn" onClick={toggleMenu}>×</button>
             <ul>
-              <li><Link to="/" onClick={toggleMenu}>Home</Link></li>
+              <li><Link to="/home" onClick={toggleMenu}>Home</Link></li>
               <li>Profile</li>
               <li>Settings</li>
               <li>Logout</li>

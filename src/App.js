@@ -27,7 +27,7 @@ import Record from './screen/Record'; // Adjust path if necessary
 import Section from './screen/Section'; // Import the Section component
 import Calendar from './screen/Calendar'; // Adjust path if necessary
 import Attendance from './screen/Attendance'; // Import the Attendance component
-
+import Student from './screen/Student'; // Import the Student component
 
 const App = () => {
   return (
@@ -36,9 +36,10 @@ const App = () => {
         <Route path="/home" element={<Home />} />
         <Route path="/" element={<SignIn />} />
         <Route path="/record" element={<Record />} />
-        <Route path="/section" element={<Section />} /> 
+        <Route path="/section" element={<Section />} />
         <Route path="/calendar/:month" element={<Calendar />} /> {/* Handle month parameter */}
         <Route path="/attendance" element={<Attendance />} /> {/* Add the attendance route */}
+        <Route path="/student" element={<Student />} /> {/* Add the student route */}
       </Routes>
     </Router>
   );
