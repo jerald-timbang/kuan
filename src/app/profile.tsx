@@ -1,92 +1,115 @@
-// // src/app/(tabs)/profile.tsx
-// import React, { useState, useEffect } from 'react';
-// import { View, Text, Image, Button, ActivityIndicator } from 'react-native';
-// import { useRouter } from 'expo-router'; // Use Expo Router for navigation
-// import { supabase } from '@/src/app/lib/supbase'; // Adjust the import path for your Supabase client
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
+import { supabase } from '@/src/app/lib/supbase'; // Adjust the import path as needed
 
-// // Define the user profile type
-// interface UserProfile {
-//   profiles_id: string; // Update to match your column name
-//   name: string;
-//   email: string;
-//   avatar_url: string | null;
-// }
+interface Teacher {
+  teacher: string;
+  email: string;
+  subject_id: string | null;
+  subject_name?: string;
+}
 
-// const Profile: React.FC = () => {
-//   const [userData, setUserData] = useState<UserProfile | null>(null);
-//   const [loading, setLoading] = useState(true);
-//   const router = useRouter(); // Use router for navigation
+const Profile: React.FC = () => {
+  const [teacherData, setTeacherData] = useState<Teacher | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-//   useEffect(() => {
-//     const fetchProfile = async () => {
-//       const {
-//         data: { session },
-//         error: sessionError,
-//       } = await supabase.auth.getSession();
+  useEffect(() => {
+    const fetchTeacherProfile = async () => {
+      try {
+        // Fetch the authenticated user
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError) throw authError;
 
-//       if (sessionError) {
-//         console.error('Error fetching session:', sessionError.message);
-//         setLoading(false);
-//         return;
-//       }
+        if (user) {
+          // Fetch teacher profile by email
+          const { data: teacher, error: teacherError } = await supabase
+            .from('teachers')
+            .select('*')
+            .eq('email', user.email)
+            .single();
 
-//       const user = session?.user;
+          if (teacherError) {
+            console.error('Error fetching teacher profile:', teacherError.message);
+            throw teacherError;
+          }
 
-//       if (user) {
-//         // Fetch the user's profile by their profiles_id
-//         const { data, error: profileError } = await supabase
-//           .from('profiles') // Adjust to your table name
-//           .select('*')
-//           .eq('profiles_id', user.id) // Update to match your column name
-//           .single(); // Get a single record
+          // Initialize teacher data
+          const teacherProfile: Teacher = {
+            ...teacher,
+            subject_name: 'No subject assigned',
+          };
 
-//         if (profileError) {
-//           console.error('Error fetching profile:', profileError.message);
-//         } else {
-//           setUserData(data); // Set user data to the fetched profile
-//         }
-//       } else {
-//         router.push('/SignIn'); // Navigate to SignIn page if no user
-//       }
+          // Fetch subject name if subject_id exists
+          if (teacher.subject_id) {
+            console.log('Fetching subject for ID:', teacher.subject_id);
+            const { data: subjects, error: subjectError } = await supabase
+              .from('subjects')
+              .select('subject_name')
+              .eq('subject_id', teacher.subject_id)
+              .limit(1);
 
-//       setLoading(false);
-//     };
+            if (subjectError) {
+              console.error('Error fetching subject name:', subjectError.message);
+            } else if (subjects && subjects.length > 0) {
+              teacherProfile.subject_name = subjects[0].subject_name;
+            }
+          }
 
-//     fetchProfile();
-//   }, [router]);
+          setTeacherData(teacherProfile);
+        } else {
+          router.push('/SignIn');
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setTeacherData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-//   if (loading) {
-//     return <ActivityIndicator size="large" color="#0000ff" />; // Loading indicator
-//   }
+    fetchTeacherProfile();
+  }, [router]);
 
-//   if (!userData) {
-//     return <Text>No profile data found</Text>; // Message if no data found
-//   }
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error.message);
+    } else {
+      router.push('/SignIn');
+    }
+  };
 
-//   const handleSignOut = async () => {
-//     const { error } = await supabase.auth.signOut();
-//     if (error) {
-//       console.error('Error signing out:', error.message);
-//     } else {
-//       router.push('/SignIn'); // Navigate to SignIn page after sign out
-//     }
-//   };
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
-//   return (
-//     <View style={{ padding: 20 }}>
-//       <Image
-//         source={{ uri: userData.avatar_url || 'default-avatar.png' }}
-//         style={{ width: 100, height: 100, borderRadius: 50 }}
-//       />
-//       <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{userData.name}</Text>
-//       <Text style={{ fontSize: 16 }}>{userData.email}</Text>
-      
-//       <View style={{ marginTop: 20 }}>
-//         {/* <Button title="Edit Profile" onPress={() => router.push('/edit-profile')} /> */}
-//         <Button title="Sign Out" onPress={handleSignOut} color="red" />
-//       </View>
-//     </View>
-//   );
-// };
+  if (!teacherData) {
+    return <Text>No teacher profile data found</Text>;
+  }
 
-// export default Profile;
+  return (
+    <View style={{ padding: 20, backgroundColor: 'white', flex: 1 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'black' }}>
+        {teacherData.teacher || 'Teacher Name Not Found'}
+      </Text>
+      <View style={{ marginTop: 10 }}>
+        <Text style={{ fontSize: 16, color: 'black' }}>
+          <Text style={{ fontWeight: 'bold' }}>📧 </Text>
+          {teacherData.email}
+        </Text>
+        <Text style={{ fontSize: 16, color: 'black' }}>
+          <Text style={{ fontWeight: 'bold' }}>📚 </Text>
+          Subject: {teacherData.subject_name || 'No subject assigned'}
+        </Text>
+      </View>
+
+      <View style={{ marginTop: 20 }}>
+        <Button title="Sign Out" onPress={handleSignOut} color="red" />
+      </View>
+    </View>
+  );
+};
+
+export default Profile;

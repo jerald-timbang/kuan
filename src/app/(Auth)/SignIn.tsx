@@ -46,7 +46,7 @@ const SignInPage = () => {
 
       
       
-      <Text style={styles.title}>Hello</Text>
+      <Text style={styles.title}>Welcome to QBAPSA</Text>
       <Text style={styles.subtitle}>Sign into your Account</Text>
 
       <TextInput
@@ -98,13 +98,15 @@ const styles = StyleSheet.create({
   },
   imageRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // This will add space between the images
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 20,
+    width: '100%',
   },
   logo: {
-    width: 150, // Adjust the width and height as necessary
-    height: 150,
-    marginHorizontal: 10, // Space between the images
+    width: 120,
+    height: 120,
+    marginHorizontal: 10,
   },
   title: {
     fontSize: 30,

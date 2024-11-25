@@ -15,7 +15,7 @@ export {
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Set initial route to match the folder structure.
+  // Change initial route to SignIn
   initialRouteName: '(Auth)/SignIn',
 };
 
@@ -55,7 +55,6 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         <Stack.Screen name="attendancePage" options={{ headerShown: true }} />
-        {/* <Tabs.Screen name="profile" options={{ title: 'Profile' }} /> */}
         {/* <Tabs.Screen name="edit-profile" options={{ title: 'Edit Profile' }} /> */}
        
         </Stack>

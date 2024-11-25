@@ -6,4 +6,9 @@ export interface Attendance {
   Last_Name: string;      // Last name
   Middle_Initial: string;
   status_marked: boolean; // Boolean for marked/unmarked status
+  students: {
+    first_name: string;
+    middle_name?: string;
+    last_name: string;
+  };
 }

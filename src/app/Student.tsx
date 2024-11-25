@@ -1,35 +1,24 @@
-// src/app/(Screen)/StudentCrud.tsx
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, FlatList, Text, Alert, Modal, StyleSheet, TouchableOpacity } from 'react-native';
-import { supabase } from '@/src/app/lib/supbase'; // Ensure this path is correct
-import Icon from 'react-native-vector-icons/FontAwesome'; // Importing the vector icon
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, Button, FlatList, TouchableOpacity, Alert, Modal, StyleSheet } from 'react-native';
+import { supabase } from '@/src/app/lib/supbase';
+import { getBackgroundColorAsync } from 'expo-system-ui';
 
 interface Student {
-  id: number;
-  created_at: string;
-  First_Name: string;
-  Middle_Initial: string;
-  Last_Name: string;
-  LRN_Number: string;
-  Contact_Number: string;
-  Parent_Name: string;
-  status_marker: boolean;
+  lrn: string;
+  first_name: string;
+  middle_name?: string;
+  last_name: string;
+  contact_number: string;
+  parent_name: string;
+  active_status: boolean;
+  address: string;
 }
 
 const StudentCrud: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
-  const [firstName, setFirstName] = useState('');
-  const [middleInitial, setMiddleInitial] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [lrnNumber, setLrnNumber] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-  const [parentName, setParentName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false); // Modal for student management info
-  const [successModalVisible, setSuccessModalVisible] = useState(false); // Modal for success confirmation
-  const [searchModalVisible, setSearchModalVisible] = useState(false); // Modal for search
-  const [searchQuery, setSearchQuery] = useState(''); // State for search input
+  const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
 
   useEffect(() => {
     fetchStudents();
@@ -37,192 +26,217 @@ const StudentCrud: React.FC = () => {
 
   const fetchStudents = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('User').select('*');
-    if (error) {
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .select('*')
+        .order('last_name', { ascending: true });
+
+      if (error) throw error;
+
+      setStudents(data || []);
+    } catch (error: any) {
       console.error('Error fetching students:', error.message);
-    } else {
-      setStudents(data as Student[] || []);
-      setFilteredStudents(data as Student[] || []); // Set filtered students initially to all students
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const addStudent = async () => {
-    if (!firstName || !lastName || !lrnNumber || !contactNumber || !parentName) {
-      Alert.alert('Error', 'Please fill all fields');
+  const handleSave = async () => {
+    if (!currentStudent) return;
+
+    const {
+      lrn,
+      first_name,
+      middle_name,
+      last_name,
+      contact_number,
+      parent_name,
+      active_status,
+      address,
+    } = currentStudent;
+
+    if (!lrn || !first_name || !last_name || !contact_number) {
+      Alert.alert('Error', 'Please fill all required fields (LRN, First Name, Last Name, Contact Number).');
       return;
     }
 
-    const { data, error } = await supabase
-      .from('User')
-      .insert([{
-        First_Name: firstName,
-        Last_Name: lastName,
-        Middle_Initial: middleInitial,
-        LRN_Number: lrnNumber,
-        Contact_Number: contactNumber,
-        Parent_Name: parentName,
-        status_marker: false,
-        created_at: new Date().toISOString(),
-      }]);
+    try {
+      if (students.find((student) => student.lrn === lrn)) {
+        // Update student
+        const { error } = await supabase
+          .from('students')
+          .update({
+            first_name,
+            middle_name,
+            last_name,
+            contact_number,
+            parent_name,
+            active_status,
+            address,
+          })
+          .eq('lrn', lrn);
 
-    if (error) {
-      console.error('Error adding student:', error.message);
-    } else {
-      setStudents([...students, ...(data || [])]);
-      setFirstName('');
-      setLastName('');
-      setMiddleInitial('');
-      setLrnNumber('');
-      setContactNumber('');
-      setParentName('');
-      setSuccessModalVisible(true); // Show the success modal
-      fetchStudents(); // Refresh the student list
+        if (error) throw error;
+      } else {
+        // Add new student
+        const { error } = await supabase
+          .from('students')
+          .insert([
+            {
+              lrn,
+              first_name,
+              middle_name,
+              last_name,
+              contact_number,
+              parent_name,
+              active_status,
+              address,
+            },
+          ]);
+
+        if (error) throw error;
+      }
+
+      fetchStudents();
+      closeModal();
+    } catch (error: any) {
+      console.error('Error saving student:', error.message);
     }
   };
 
-  const deleteStudent = async (id: number) => {
-    const { error } = await supabase.from('User').delete().eq('id', id);
-    if (error) {
-      console.error('Error deleting student:', error.message);
-    } else {
-      setStudents(students.filter((student) => student.id !== id));
-      setFilteredStudents(filteredStudents.filter((student) => student.id !== id)); // Update filtered list
-    }
-  };
+  const handleDelete = async (lrn: string) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this student?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const { error } = await supabase.from('students').delete().eq('lrn', lrn);
 
-  const handleSearch = () => {
-    const query = searchQuery.toLowerCase();
-    const filtered = students.filter(student => 
-      `${student.First_Name} ${student.Middle_Initial ? student.Middle_Initial + '. ' : ''}${student.Last_Name}`.toLowerCase().includes(query) ||
-      student.LRN_Number.toLowerCase().includes(query)
+              if (error) throw error;
+
+              fetchStudents();
+            } catch (error: any) {
+              console.error('Error deleting student:', error.message);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
     );
-    setFilteredStudents(filtered);
-    setSearchModalVisible(false); // Close the search modal
-    setSearchQuery(''); // Clear the search input
   };
+
+  const openModal = (student: Student | null = null) => {
+    setCurrentStudent(
+      student || {
+        lrn: '',
+        first_name: '',
+        middle_name: '',
+        last_name: '',
+        contact_number: '',
+        parent_name: '',
+        active_status: false,
+        address: '',
+      }
+    );
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setCurrentStudent(null);
+  };
+
+  const renderStudentItem = ({ item }: { item: Student }) => (
+    <View style={styles.studentItem}>
+      <Text style={styles.studentText}>
+        {item.first_name} {item.middle_name ? item.middle_name + ' ' : ''}{item.last_name}
+      </Text>
+      <Text style={styles.studentSubText}>LRN: {item.lrn}</Text>
+      <Text style={styles.studentSubText}>Contact: {item.contact_number}</Text>
+      <View style={styles.buttonContainer}>
+        <Button title="Edit" color="#333" onPress={() => openModal(item)} />
+        <Button title="Delete" color="#333" onPress={() => handleDelete(item.lrn)} />
+      </View>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Student Management</Text>
-        <TouchableOpacity onPress={() => setSearchModalVisible(true)}>
-          <Icon name="search" size={24} color="white" style={styles.searchIcon} />
-        </TouchableOpacity>
-      </View>
-
-      <TextInput
-        style={styles.input}
-        placeholder="First Name"
-        value={firstName}
-        onChangeText={setFirstName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Last Name"
-        value={lastName}
-        onChangeText={setLastName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Middle Initial"
-        value={middleInitial}
-        onChangeText={setMiddleInitial}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="LRN Number"
-        value={lrnNumber}
-        onChangeText={setLrnNumber}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Contact Number"
-        value={contactNumber}
-        onChangeText={setContactNumber}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Parent Name"
-        value={parentName}
-        onChangeText={setParentName}
-      />
-      <Button title="Add Student" onPress={addStudent} />
-
-      <Text style={styles.listTitle}>
-        Student List
-      </Text>
+      <Text style={styles.title}>Student Management</Text>
+      <Button title="Add New Student" color="#333" onPress={() => openModal()} />
       {loading ? (
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text>Loading...</Text>
       ) : (
         <FlatList
-          data={filteredStudents} // Use filteredStudents for displaying
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.studentItem}>
-              <Text style={styles.studentText}>
-                {item.First_Name} {item.Middle_Initial ? `${item.Middle_Initial}. ` : ''}{item.Last_Name}
-              </Text>
-              <Text style={styles.lrnText}>
-                LRN: {item.LRN_Number}
-              </Text>
-              <Button title="Delete" onPress={() => deleteStudent(item.id)} />
-            </View>
-          )}
+          data={students}
+          keyExtractor={(item) => item.lrn}
+          renderItem={renderStudentItem}
+          style={styles.list}
         />
       )}
 
-      {/* Modal for success confirmation */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={successModalVisible}
-        onRequestClose={() => setSuccessModalVisible(false)}
-      >
+      {/* Modal for Add/Edit Student */}
+      <Modal animationType="slide" transparent visible={modalVisible} onRequestClose={closeModal}>
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Success!</Text>
-            <Text style={styles.modalText}>Student added successfully!</Text>
-            <Button title="Close" onPress={() => setSuccessModalVisible(false)} />
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal for Student Management */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Student Management Info</Text>
-            <Text style={styles.modalText}>Here you can manage your students.</Text>
-            <Button title="Close" onPress={() => setModalVisible(false)} />
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal for Search */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={searchModalVisible}
-        onRequestClose={() => setSearchModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Search Students</Text>
+            <Text style={[styles.modalTitle, { color: '#333' }]}>
+              {currentStudent?.lrn ? 'Edit Student' : 'Add New Student'}
+            </Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter student name or LRN"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
+              placeholder="LRN"
+              value={currentStudent?.lrn || ''}
+              onChangeText={(text) => setCurrentStudent({ ...currentStudent!, lrn: text })}
             />
-            <View style={styles.buttonContainer}>
-              <Button title="Search" onPress={handleSearch} />
-              <Button title="Close" onPress={() => setSearchModalVisible(false)} />
+            <TextInput
+              style={styles.input}
+              placeholder="First Name"
+              value={currentStudent?.first_name || ''}
+              onChangeText={(text) => setCurrentStudent({ ...currentStudent!, first_name: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Middle Name"
+              value={currentStudent?.middle_name || ''}
+              onChangeText={(text) => setCurrentStudent({ ...currentStudent!, middle_name: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Last Name"
+              value={currentStudent?.last_name || ''}
+              onChangeText={(text) => setCurrentStudent({ ...currentStudent!, last_name: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Contact Number"
+              value={currentStudent?.contact_number || ''}
+              onChangeText={(text) => setCurrentStudent({ ...currentStudent!, contact_number: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Parent Name"
+              value={currentStudent?.parent_name || ''}
+              onChangeText={(text) => setCurrentStudent({ ...currentStudent!, parent_name: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Address"
+              value={currentStudent?.address || ''}
+              onChangeText={(text) => setCurrentStudent({ ...currentStudent!, address: text })}
+            />
+            <View style={styles.buttonGroup}>
+              <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={closeModal} style={styles.cancelButton}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -230,93 +244,37 @@ const StudentCrud: React.FC = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF',
-    padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-   
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#000',
-    textAlign: 'center',
-  },
-  searchIcon: {
-    marginLeft: 10,
-    color: '#000',
-  },
-  input: {
-    borderWidth: 1,
-    marginBottom: 10,
-    padding: 10,
-    color: '#000',
-    backgroundColor: 'white',
-    
-  },
-  listTitle: {
-    fontSize: 20,
-    marginTop: 20,
-    color: 'white',
-  },
-  loadingText: {
-    color: 'white',
-  },
-  studentItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'white',
-  },
-  studentText: {
-    color: '#000',
-  },
-  lrnText: {
-    color: '#000',
-    fontStyle: 'italic',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
-  },
-  modalView: {
-    width: 300,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  modalText: {
-    marginVertical: 10,
-    textAlign: 'center',
-  },
+  container: { flex: 1, padding: 20, backgroundColor: 'white' },
+
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+
+  list: { marginTop: 10 },
+
+  studentItem: { padding: 10, borderBottomWidth: 1 },
+
+  studentText: { fontSize: 16, fontWeight: 'bold' },
+
+  studentSubText: { fontSize: 14, color: 'gray' },
+
+  buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
+
+  modalContainer: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+
+  modalView: { margin: 20, padding: 20, backgroundColor: 'white', borderRadius: 10, elevation: 5 },
+
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  
+  input: { marginBottom: 10, borderWidth: 1, borderColor: 'gray', borderRadius: 5, padding: 10 },
+  saveButton: { backgroundColor: '#333', padding: 10, borderRadius: 5 },
+
+  saveButtonText: { color: 'white', textAlign: 'center' },
+
+  cancelButton: { marginTop: 10, backgroundColor: '#333', padding: 10, borderRadius: 5 },
+
+  cancelButtonText: { color: 'white', textAlign: 'center' },
+
+  buttonGroup: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
 });
 
 export default StudentCrud;

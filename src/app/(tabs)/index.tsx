@@ -1,5 +1,5 @@
-import { StyleSheet, View, TouchableOpacity, Modal, Text as RNText } from 'react-native';
-import { useState } from 'react';
+import { StyleSheet, View, TouchableOpacity, Animated, Text as RNText } from 'react-native';
+import { useState, useRef } from 'react';
 import { Text } from '@/src/components/Themed';
 import { MaterialIcons } from '@expo/vector-icons';
 import Screelogo from '@/src/app/(Screen)/screen';
@@ -8,11 +8,24 @@ import { supabase } from '@/src/app/lib/supbase'; // Adjust the import path for 
 
 export default function TabOneScreen() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const router = useRouter(); // Initialize the router
+  const slideAnim = useRef(new Animated.Value(-250)).current; // Slide animation for the side menu
+  const router = useRouter();
 
-  const handleMenuClick = (menuItem: string) => {
-    console.log(`${menuItem} clicked`);
-    setIsMenuOpen(false);
+  const toggleMenu = () => {
+    if (isMenuOpen) {
+      Animated.timing(slideAnim, {
+        toValue: -250, // Slide off-screen
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setIsMenuOpen(false));
+    } else {
+      setIsMenuOpen(true);
+      Animated.timing(slideAnim, {
+        toValue: 0, // Slide into view
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
   };
 
   const handleSignOut = async () => {
@@ -20,63 +33,48 @@ export default function TabOneScreen() {
     if (error) {
       console.error('Error signing out:', error.message);
     } else {
-      router.push('/(Auth)/SignIn'); // Navigate to the SignInPage after signing out
+      router.push('/(Auth)/SignIn');
     }
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.burgerIcon} onPress={() => setIsMenuOpen(!isMenuOpen)}>
+      {/* Burger Icon */}
+      <TouchableOpacity style={styles.burgerIcon} onPress={toggleMenu}>
         <MaterialIcons name="menu" size={30} color="black" />
       </TouchableOpacity>
 
       <Text style={styles.title}>QR-Based Attendance with Parental SMS Alert</Text>
+      <Screelogo />
 
-      <View>
-        <Screelogo />
-      </View>
-
-      {/* Modal for Burger Menu */}
-      <Modal
-        transparent={true}
-        animationType="slide"
-        visible={isMenuOpen}
-        onRequestClose={() => setIsMenuOpen(false)} // Close on back press
-      >
-        <View style={styles.menuOverlay}>
-          <View style={styles.menuContainer}>
-            <TouchableOpacity onPress={() => handleMenuClick('Home')} style={styles.menuItem}>
-              <RNText style={styles.menuItemText}>Home</RNText>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => handleMenuClick('Records')} style={styles.menuItem}>
-              <Link href={'/Records'} style={styles.menuItemText}>
-                Records
-              </Link>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => handleMenuClick('Student')} style={styles.menuItem}>
+      {/* Slide-In Side Menu */}
+      <Animated.View style={[styles.sideMenu, { transform: [{ translateX: slideAnim }] }]}>
+        <TouchableOpacity style={styles.closeMenuButton} onPress={toggleMenu}>
+          <RNText style={styles.closeMenuText}>Close</RNText>
+        </TouchableOpacity>
+        <View style={styles.menuItems}>
+          <TouchableOpacity onPress={() => { toggleMenu(); /* Navigate to Records */ }}>
+            <Link href={'/Records'} style={styles.menuItemText}>
+              Records
+            </Link>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { toggleMenu(); /* Navigate to Student */ }}>
             <Link href={'/Student'} style={styles.menuItemText}>
-                Student
-              </Link>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => handleMenuClick('profile')} style={styles.menuItem}>
+              Student
+            </Link>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { toggleMenu(); /* Navigate to Attendance */ }}>
+            <Link href={'/attendancePage'} style={styles.menuItemText}>
+              Attendance
+            </Link>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { toggleMenu(); /* Navigate to Profile */ }}>
             <Link href={'/profile'} style={styles.menuItemText}>
-                profile
-              </Link>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={handleSignOut} style={styles.menuItem}>
-              <RNText style={styles.menuItemText}>Sign Out</RNText>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setIsMenuOpen(false)} style={styles.closeMenu}>
-              <RNText style={styles.closeMenuText}>Close</RNText>
-            </TouchableOpacity>
-          </View>
+              Profile
+            </Link>
+          </TouchableOpacity>
         </View>
-      </Modal>
+      </Animated.View>
     </View>
   );
 }
@@ -102,37 +100,35 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
   },
-  menuOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  menuContainer: {
-    backgroundColor: 'white',
-    borderRadius: 10,
+  sideMenu: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 250,
+    height: '100%',
+    backgroundColor: '#333333c8',
     padding: 20,
-    width: '80%',
-    alignItems: 'center',
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  menuItem: {
-    width: '100%',
-    paddingVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+  closeMenuButton: {
+    marginBottom: 20,
+  },
+  closeMenuText: {
+    fontSize: 16,
+    color: 'white',
+    textAlign: 'center',
+  },
+  menuItems: {
+    flex: 1,
   },
   menuItemText: {
     fontSize: 18,
-    color: '#000',
-  },
-  closeMenu: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#007BFF',
-    borderRadius: 5,
-  },
-  closeMenuText: {
     color: 'white',
-    fontWeight: 'bold',
+    marginVertical: 10,
   },
 });
