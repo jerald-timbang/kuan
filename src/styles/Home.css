@@ -4,6 +4,8 @@ Home container styles
     flex-direction: column;
     align-items: center;
     font-family: Arial, sans-serif;
+    
+    
 }
 
 /* Header styles */
@@ -14,29 +16,37 @@ Home container styles
     color: white;
     display: flex;
     align-items: center;
+    
+    
 }
 
 .menu-icon {
     font-size: 24px;
     cursor: pointer;
     margin-right: 10px;
+    
 }
 
 .home-header h1 {
     margin: 0;
     font-size: 20px;
+    
 }
 
 /* Main content styles */
 .home-content {
     text-align: center;
     margin-top: 20px;
+
+    
 }
 
 .home-content h2 {
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 20px;
+    
+    
 }
 
 /* Button container styles */
@@ -46,6 +56,7 @@ Home container styles
     gap: 20px; /* Space between buttons */
     align-items: center; /* Center buttons horizontally */
     margin-top: 20px; /* Add some margin to the top */
+    
 }
 
 /* Button styles */
@@ -59,10 +70,12 @@ Home container styles
   cursor: pointer;
   transition: background-color 0.3s;
   text-align: center; /* Center the text */
+  
 }
 
 .class-button:hover {
   background-color:   #eb1088;
+  
 }
 
 /* Popup overlay styles */
@@ -123,7 +136,7 @@ Home container styles
   border: none;
   font-size: 16px;
   cursor: pointer;
-  color: #333;
+  color: #ffffff;
 }
 
 
@@ -200,4 +213,43 @@ Home container styles
     height: 200px;
     margin: 0 400px;
     object-fit: contain; /* Ensures the image maintains its aspect ratio within the 200x200 box */
+}
+
+/* Updated side menu styles */
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -250px; /* Start off-screen */
+  width: 250px;
+  height: 100%;
+  background-color: #333333c8; /* Slightly transparent background */
+  transition: left 0.3s ease; /* Smooth transition */
+  z-index: 1000; /* Ensure it appears above other content */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  /* Optional shadow for depth */
+}
+
+.side-menu.active {
+  left: 0; /* Slide in */
+  
+}
+
+/* Menu item styles */
+.side-menu ul {
+  list-style: none;
+  padding: 20px; /* Add padding for spacing */
+  margin: 0;
+  
+
+}
+
+.side-menu li {
+  padding: 15px 0; /* Space between items */
+  font-size: 17px; /* Font size for menu items */
+  cursor: pointer; /* Change cursor on hover */
+  color: #b0b0b0;
+}
+
+.side-menu li:hover {
+  background-color: #f0f0f0; /* Highlight on hover */
 }

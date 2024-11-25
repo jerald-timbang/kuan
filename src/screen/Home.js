@@ -1,61 +1,3 @@
-// import React, { useState } from 'react';
-// import { Link } from 'react-router-dom';
-// import './Home.css';
-// import logoSchool from '../assets/logoSchool.png'; // Replace with your actual school logo path
-// import logoUSTP from '../assets/logoUSTP.png';     // Replace with your actual USTP logo path
-
-// const Home = () => {
-//   const [showMenu, setShowMenu] = useState(false);
-
-//   // Function to toggle popup menu visibility
-//   const toggleMenu = () => {
-//     setShowMenu(!showMenu);
-//   };
-
-//   return (
-//     <div className="home-container">
-//       <header className="home-header">
-//         <div className="menu-icon" onClick={toggleMenu}>☰</div>
-//         <h1>Home</h1>
-//       </header>
-
-//       <div className="home-content">
-//         <h2>QR-Based Attendance with Parental SMS Alert</h2>
-
-//         <div className="logo-container">
-//           <img src={logoSchool} alt="School Logo" className="logo" />
-//           <img src={logoUSTP} alt="USTP Logo" className="logo" />
-//         </div>
-//       </div>
-
-//       {/* Popup Menu */}
-//       {showMenu && (
-//         <div className="popup-overlay" onClick={toggleMenu}>
-//           <div className="popup-menu" onClick={(e) => e.stopPropagation()}>
-//             <button className="close-btn" onClick={toggleMenu}>×</button>
-//             <ul>
-//               <li>
-//                 <Link to="/record" onClick={toggleMenu}>Record</Link>
-//               </li>
-//               <li>Profile</li>
-//               <li>Settings</li>
-//               <li>
-//               <Link to="/record" onClick={toggleMenu}>Record</Link>
-//               </li>
-//             </ul>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Home;
-
-
-
-// Home.js
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom'; // Import Link for navigation
 import '../styles/Home.css'; // Ensure this path is correct
@@ -77,6 +19,16 @@ const Home = () => {
         <h1>Home</h1>
       </header>
 
+      <div className={`side-menu ${showMenu ? 'active' : ''}`}>
+        <button className="close-btn" onClick={toggleMenu}>Close</button>
+        <ul>
+          <li><Link to="/record" onClick={toggleMenu}>Record</Link></li>
+          <li><Link to="/Attendance" onClick={toggleMenu}>Attendance</Link></li>
+          <li><Link to="/Student" onClick={toggleMenu}>Student</Link></li>
+          <li><Link to="/Profile" onClick={toggleMenu}>Profile</Link></li>
+        </ul>
+      </div>
+
       <div className="home-content">
         <h2>QR-Based Attendance with Parental SMS Alert</h2>
         
@@ -88,23 +40,6 @@ const Home = () => {
 
         {/* Add your other content here */}
       </div>
-
-      {/* Popup Menu */}
-      {showMenu && (
-        <div className="popup-overlay" onClick={toggleMenu}>
-          <div className="popup-menu" onClick={(e) => e.stopPropagation()}>
-          <button className="close-btn" onClick={toggleMenu}>Close</button>
-                      <ul>
-              <li><Link to="/record" onClick={toggleMenu}>Record</Link></li>
-              <li>
-              <li><Link to="/Attendance" onClick={toggleMenu}>Attendance</Link></li>
-              </li>
-              <li><Link to="/Student" onClick={toggleMenu}>Student</Link></li>
-              <li>Logout</li>
-            </ul>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

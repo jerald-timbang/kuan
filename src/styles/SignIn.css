@@ -5,6 +5,11 @@
   padding: 20px;
   text-align: center;
   font-family: Arial, sans-serif;
+  /* background: linear-gradient(to bottom right, #FF6F61, #6FA3EF);
+  min-height: 100vh;
+  width: 100%;
+  padding-left: 20px; 
+  padding-right:50px ; */
 }
 
 /* Logo styling */
@@ -15,9 +20,10 @@
   margin-bottom: 20px;
 }
 
-.logo {
-  height: 80px; /* Adjust logo height */
-  width: auto;
+.logogo {
+  height: 180px; /* Adjust logo height */
+  width: 150px;
+  margin: 0 10px;
 }
 
 /* Text styling */
@@ -29,7 +35,7 @@ h2 {
 
 p {
   font-size: 16px;
-  color: gray;
+  color: black;
   margin-bottom: 20px;
 }
 
@@ -60,8 +66,8 @@ button {
   padding: 12px;
   border: none;
   border-radius: 25px;
-  background-color: black;
-  color: #333;
+  background-color: #333;
+  color: black;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s;

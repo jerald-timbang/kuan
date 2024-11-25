@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient'; // Import supabase client
 import '../styles/SignIn.css';
-
+import logoSchool from '../assets/logoSchool.png'; // Replace with your actual school logo path
+import logoUSTP from '../assets/logoUSTP.png';     // Replace with your actual USTP logo path
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -37,7 +38,9 @@ const SignIn = () => {
 
   return (
     <div className="sign-in-container">
-      <h2>Hello</h2>
+      <img src={logoUSTP} alt="logoUSTP" className="logogo" />
+      <img src={logoSchool} alt="logoSchool" className="logogo" />
+      <h2>Welcome to QBAPSA</h2>
       <p>Sign into your Account</p>
       <form onSubmit={handleSubmit}>
         <div className="input-container">
@@ -58,7 +61,7 @@ const SignIn = () => {
             required
           />
         </div>
-        <button type="submit" disabled={loading}>
+        <button type="submit"  disabled={loading}>
           {loading ? 'Signing In...' : 'Login'}
         </button>
         {error && <p className="error-message">{error}</p>}

@@ -11,12 +11,19 @@ const Attendance = () => {
     const fetchAttendanceRecords = async () => {
       try {
         const { data, error } = await supabase
-          .from('User') // Make sure this table name matches your Supabase table
-          .select('id, created_at, Last_Name, First_Name, status_name');
+          .from('attendance')
+          .select(`
+            student_lrn,
+            date,
+            status,
+            evaluation,
+            students (first_name, middle_name, last_name)
+          `)
+          .order('date', { ascending: false });
 
         if (error) throw error;
-
-        // Set fetched data to state
+        
+        console.log('Fetched data:', data);
         setAttendanceRecords(data);
       } catch (error) {
         console.error('Error fetching attendance records:', error.message);
@@ -28,27 +35,6 @@ const Attendance = () => {
     fetchAttendanceRecords();
   }, []);
 
-  // Function to update the status in Supabase and the local state
-  const updateStatus = async (id, newStatus) => {
-    try {
-      const { error } = await supabase
-        .from('User')
-        .update({ status_name: newStatus })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      // Update the state locally to reflect the change
-      setAttendanceRecords((prevRecords) =>
-        prevRecords.map((record) =>
-          record.id === id ? { ...record, status_name: newStatus } : record
-        )
-      );
-    } catch (error) {
-      console.error('Error updating status:', error.message);
-    }
-  };
-
   // Display loading message while fetching data
   if (loading) {
     return <p>Loading...</p>;
@@ -57,47 +43,37 @@ const Attendance = () => {
   return (
     <div className="attendance-container">
       <header className="attendance-header">
-        <h1>Attendance</h1>
+        <h1>Attendance Logs</h1>
       </header>
       <div className="attendance-content">
-        <p>This is the attendance page. You can manage attendance records here.</p>
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Last Name</th>
-                <th>First Name</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {attendanceRecords.map((record) => (
-                <tr key={record.id}>
-                  <td>{new Date(record.created_at).toLocaleDateString()}</td>
-                  <td>{record.Last_Name}</td>
-                  <td>{record.First_Name}</td>
-                  <td>{record.status_name ? 'Present' : 'Absent'}</td>
-                  <td>
-                    <button 
-                      onClick={() => updateStatus(record.id, true)} 
-                      disabled={record.status_name === true}
-                    >
-                      Present
-                    </button>
-                    <button 
-                      onClick={() => updateStatus(record.id, false)} 
-                      disabled={record.status_name === false}
-                    >
-                      Absent
-                    </button>
-                  </td>
+        {attendanceRecords.length === 0 ? (
+          <p>No attendance records found</p>
+        ) : (
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Evaluation</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {attendanceRecords.map((record, index) => (
+                  <tr key={index}>
+                    <td>
+                      {`${record.students.first_name} ${record.students.middle_name || ''} ${record.students.last_name}`}
+                    </td>
+                    <td>{record.date}</td>
+                    <td>{record.status}</td>
+                    <td>{record.evaluation}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

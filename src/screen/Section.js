@@ -37,17 +37,17 @@ const Section = () => {
 
       {/* Popup Menu */}
       {showMenu && (
-        <div className="popup-overlay" onClick={toggleMenu}>
-          <div className="popup-menu" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={toggleMenu}>×</button>
-            <ul>
-              <li><Link to="/home" onClick={toggleMenu}>Home</Link></li>
-              <li>Profile</li>
-              <li>Settings</li>
-              <li>Logout</li>
-            </ul>
+        <div className={`side-menu ${showMenu ? 'active' : ''}`}>
+        <button className="close-btn" onClick={toggleMenu}>Close</button>
+        <ul>
+        <li><Link to="/home" onClick={toggleMenu}>Home</Link></li>
+        
+          <li><Link to="/Attendance" onClick={toggleMenu}>Attendance</Link></li>
+          <li><Link to="/Student" onClick={toggleMenu}>Student</Link></li>
+          <li><Link to="/Profile" onClick={toggleMenu}>Profile</Link></li>
+        </ul>
           </div>
-        </div>
+        
       )}
     </div>
   );

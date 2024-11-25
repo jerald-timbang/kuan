@@ -28,6 +28,7 @@ import Section from './screen/Section'; // Import the Section component
 import Calendar from './screen/Calendar'; // Adjust path if necessary
 import Attendance from './screen/Attendance'; // Import the Attendance component
 import Student from './screen/Student'; // Import the Student component
+import Profile from './screen/Profile'; // Import the Profile component
 
 const App = () => {
   return (
@@ -40,6 +41,7 @@ const App = () => {
         <Route path="/calendar/:month" element={<Calendar />} /> {/* Handle month parameter */}
         <Route path="/attendance" element={<Attendance />} /> {/* Add the attendance route */}
         <Route path="/student" element={<Student />} /> {/* Add the student route */}
+        <Route path="/profile" element={<Profile />} /> {/* Add the profile route */}
       </Routes>
     </Router>
   );
